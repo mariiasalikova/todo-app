@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -30,4 +31,21 @@ func (h *Handler) userIdentity(c *gin.Context) {
 	}
 
 	c.Set("userId", userId)
+}
+func getUserId(c *gin.Context) (int, error) {
+	id, ok := c.Get(userCtx)
+	if !ok {
+		newErrorResponse(c, http.StatusUnauthorized, "Invalid authorization header")
+		return 0, errors.New("Invalid authorization header")
+
+	}
+
+	idInt, ok := id.(int)
+	if !ok {
+		newErrorResponse(c, http.StatusUnauthorized, "Invalid authorization header")
+		return 0, errors.New("Invalid authorization header")
+
+	}
+
+	return idInt, nil
 }
