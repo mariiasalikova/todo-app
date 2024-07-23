@@ -36,4 +36,5 @@ func (i UpdateListInput) Validate() error {
 	if i.Title == "" && i.Description == "" {
 		return errors.New("must provide a title/a description")
 	}
+	return nil
 }
