@@ -5,6 +5,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/mariiasalikova/todo-app"
+
 	"github.com/mariiasalikova/todo-app/pkg/handler"
 	"github.com/mariiasalikova/todo-app/pkg/repository"
 	"github.com/mariiasalikova/todo-app/pkg/service"
@@ -14,6 +15,17 @@ import (
 	"os/signal"
 	"syscall"
 )
+
+// @title           Todo App API
+// @version         1.0
+// @description     This is a Todo web app Server.
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
