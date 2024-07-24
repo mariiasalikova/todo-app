@@ -1,15 +1,18 @@
 package main
 
 import (
+	"context"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/mariiasalikova/todo-app"
 	"github.com/mariiasalikova/todo-app/pkg/handler"
 	"github.com/mariiasalikova/todo-app/pkg/repository"
 	"github.com/mariiasalikova/todo-app/pkg/service"
-	"github.com/spf13/viper"
-	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"os"
-	"github.com/joho/godotenv"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -40,15 +43,32 @@ func main() {
 	handlers := handler.NewHandler(services)
 
 	srv := new(todo.Server)
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		logrus.Fatalf("error occured while running the server: %s", err.Error())
+	go func() {
+		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+			logrus.Fatalf("error occured while running the server: %s", err.Error())
+		}
+	}()
+
+	logrus.Println("server started")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	logrus.Println("server shutting down")
+
+	if err := srv.Shutdown(context.Background()); err != nil {
+		logrus.Errorf("error occured while shutting down server: %s", err.Error())
+	}
+
+	if err := db.Close(); err != nil {
+		logrus.Errorf("error occured while db closing: %s", err.Error())
 	}
 
 }
 
 func initConfig() error {
 	viper.AddConfigPath("configs")
-	viper.SetConfigName("config")	
+	viper.SetConfigName("config")
 
 	return viper.ReadInConfig()
 
